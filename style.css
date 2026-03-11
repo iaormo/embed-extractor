@@ -1131,6 +1131,76 @@ body {
   margin-top: 2px;
 }
 
+/* ---- Feedback FAB ---- */
+.feedback-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  z-index: 999;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.feedback-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+}
+
+.feedback-fab:active { transform: scale(0.95); }
+
+.modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--ink-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.modal-close-btn:hover {
+  color: var(--ink);
+  background: var(--hover-bg);
+}
+
+.modal-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 200ms ease;
+}
+
+.modal-textarea:focus { border-color: var(--ink); }
+.modal-textarea::placeholder { color: var(--ink-muted); }
+
+.modal-success {
+  font-size: 0.75rem;
+  color: #1e7e34;
+  text-align: center;
+  margin-top: 2px;
+}
+
 /* ---- Utilities ---- */
 .hidden { display: none !important; }
 

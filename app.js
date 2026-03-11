@@ -124,6 +124,94 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check session on load
   checkSession();
 
+  // ---- Feedback Modal ----
+  const feedbackFab = document.getElementById('feedbackFab');
+  const feedbackModal = document.getElementById('feedbackModal');
+  const feedbackCloseBtn = document.getElementById('feedbackCloseBtn');
+  const fbName = document.getElementById('fbName');
+  const fbEmail = document.getElementById('fbEmail');
+  const fbMessage = document.getElementById('fbMessage');
+  const fbSubmitBtn = document.getElementById('fbSubmitBtn');
+  const fbError = document.getElementById('fbError');
+  const fbSuccess = document.getElementById('fbSuccess');
+
+  if (feedbackFab) {
+    feedbackFab.addEventListener('click', () => {
+      feedbackModal.classList.remove('hidden');
+    });
+  }
+
+  if (feedbackCloseBtn) {
+    feedbackCloseBtn.addEventListener('click', () => {
+      feedbackModal.classList.add('hidden');
+    });
+  }
+
+  // Close feedback modal on overlay click
+  if (feedbackModal) {
+    feedbackModal.addEventListener('click', (e) => {
+      if (e.target === feedbackModal) feedbackModal.classList.add('hidden');
+    });
+  }
+
+  async function handleFeedback() {
+    const name = fbName.value.trim();
+    const email = fbEmail.value.trim();
+    const message = fbMessage.value.trim();
+
+    fbError.classList.add('hidden');
+    fbSuccess.classList.add('hidden');
+
+    if (!name || !email || !message) {
+      fbError.textContent = 'Please fill in all fields.';
+      fbError.classList.remove('hidden');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      fbError.textContent = 'Please enter a valid email address.';
+      fbError.classList.remove('hidden');
+      return;
+    }
+
+    fbSubmitBtn.disabled = true;
+    fbSubmitBtn.textContent = 'Submitting...';
+
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fbSuccess.classList.remove('hidden');
+        fbName.value = '';
+        fbEmail.value = '';
+        fbMessage.value = '';
+        setTimeout(() => {
+          feedbackModal.classList.add('hidden');
+          fbSuccess.classList.add('hidden');
+        }, 2000);
+      } else {
+        fbError.textContent = data.error || 'Submission failed. Please try again.';
+        fbError.classList.remove('hidden');
+      }
+    } catch {
+      fbError.textContent = 'Connection error. Please try again.';
+      fbError.classList.remove('hidden');
+    } finally {
+      fbSubmitBtn.disabled = false;
+      fbSubmitBtn.textContent = 'Submit Feedback';
+    }
+  }
+
+  if (fbSubmitBtn) {
+    fbSubmitBtn.addEventListener('click', handleFeedback);
+    fbMessage.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleFeedback(); }
+    });
+  }
+
   // ---- URL Parsers / Extractors ----
   const extractors = {
     // Archive.org

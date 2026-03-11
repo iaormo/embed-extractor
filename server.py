@@ -322,6 +322,8 @@ class XtractHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == '/api/register':
             self.handle_register()
+        elif parsed.path == '/api/feedback':
+            self.handle_feedback()
         else:
             self.send_error(404, 'Not found')
 
@@ -1649,6 +1651,40 @@ body {{ margin:0; padding:0; background:white; overflow:hidden; }}
         finally:
             conn.close()
 
+    def handle_feedback(self):
+        """Handle feedback/suggestion submission. Placeholder for GoHighLevel integration."""
+        try:
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length)
+            data = json.loads(body)
+        except Exception:
+            self.send_error(400, 'Invalid JSON')
+            return
+
+        name = (data.get('name') or '').strip()
+        email = (data.get('email') or '').strip()
+        message = (data.get('message') or '').strip()
+
+        if not name or not email or not message:
+            self.send_response(400)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': 'All fields are required'}).encode())
+            return
+
+        # Log the feedback (placeholder — connect to GoHighLevel later)
+        sys.stderr.write(f"[Xtract] Feedback from {name} <{email}>: {message[:100]}\n")
+
+        # TODO: Forward to GoHighLevel webhook here
+        # e.g. requests.post(GHL_WEBHOOK_URL, json={...})
+
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(json.dumps({'success': True}).encode())
+
     def do_OPTIONS(self):
         """Handle CORS preflight for POST requests."""
         self.send_response(200)
@@ -1658,9 +1694,10 @@ body {{ margin:0; padding:0; background:white; overflow:hidden; }}
         self.end_headers()
 
     def end_headers(self):
-        # Add CORS headers to all responses
+        # Add CORS headers and no-cache for dev
         if '/api/' not in self.path:
             self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         super().end_headers()
 
     def log_message(self, format, *args):
