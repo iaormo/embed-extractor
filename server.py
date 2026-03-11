@@ -280,6 +280,15 @@ def _init_db():
                     created_at TIMESTAMP DEFAULT NOW()
                 )
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS feedback (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    message TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT NOW()
+                )
+            """)
             conn.commit()
         sys.stderr.write("[Xtract] Database initialized\n")
     except Exception as e:
@@ -1673,8 +1682,23 @@ body {{ margin:0; padding:0; background:white; overflow:hidden; }}
             self.wfile.write(json.dumps({'error': 'All fields are required'}).encode())
             return
 
-        # Log the feedback (placeholder — connect to GoHighLevel later)
-        sys.stderr.write(f"[Xtract] Feedback from {name} <{email}>: {message[:100]}\n")
+        # Store in DB if available
+        conn = _get_db_conn()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "INSERT INTO feedback (name, email, message) VALUES (%s, %s, %s)",
+                        (name, email, message)
+                    )
+                    conn.commit()
+                sys.stderr.write(f"[Xtract] Feedback saved from {name} <{email}>\n")
+            except Exception as e:
+                sys.stderr.write(f"[Xtract] Feedback DB error: {e}\n")
+            finally:
+                conn.close()
+        else:
+            sys.stderr.write(f"[Xtract] Feedback (no DB) from {name} <{email}>: {message[:100]}\n")
 
         # TODO: Forward to GoHighLevel webhook here
         # e.g. requests.post(GHL_WEBHOOK_URL, json={...})
