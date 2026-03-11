@@ -1201,6 +1201,16 @@ body {
   margin-top: 2px;
 }
 
+/* ---- Footer ---- */
+.site-footer {
+  text-align: center;
+  padding: 32px 0 24px;
+  color: var(--ink-muted);
+  font-size: 0.65rem;
+  border-top: 1px solid var(--border);
+  margin-top: 48px;
+}
+
 /* ---- Utilities ---- */
 .hidden { display: none !important; }
 
